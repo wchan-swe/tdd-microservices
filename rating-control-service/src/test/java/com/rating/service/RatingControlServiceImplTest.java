@@ -51,6 +51,4 @@ public class RatingControlServiceImplTest {
 
         assertThat(ratingControlService.canReadBook(CUSTOMER_RATING_LEVEL_CODE_12, TEST_BOOK_ID)).isTrue();
     }
-
-
 }
