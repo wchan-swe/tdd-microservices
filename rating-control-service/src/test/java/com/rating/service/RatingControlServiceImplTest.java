@@ -1,5 +1,8 @@
 package com.rating.service;
 
+import com.rating.common.RatingControlServiceConfig;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,8 +44,16 @@ public class RatingControlServiceImplTest {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private RatingControlServiceConfig ratingControlServiceConfig;
+
     @InjectMocks
     private RatingControlServiceImpl ratingControlService;
+
+    @BeforeEach
+    public void setup() {
+        when(ratingControlServiceConfig.getBookServiceEndpoint()).thenReturn(VALID_URL_BOOK_SERVICE);
+    }
 
     @Test
     public void shouldReturnTrue_whenBookCodeLevelReturns12_andCustomerProvidedRatingCodeIs12() throws Exception {
