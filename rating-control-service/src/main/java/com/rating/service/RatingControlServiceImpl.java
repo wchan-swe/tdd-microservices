@@ -2,6 +2,8 @@ package com.rating.service;
 
 import com.rating.common.RatingControlServiceConfig;
 import com.rating.common.RatingLevels;
+import com.rating.exception.BookNotFoundException;
+import com.rating.exception.TechnicalFailureException;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -34,20 +36,26 @@ public class RatingControlServiceImpl implements RatingControlService{
         Map<String, Integer> ratingControlLevelMap = RatingLevels.RATING_CODE_LEVEL;
         Integer customerProvidedRatingLevelOrder = ratingControlLevelMap.get(customerRatingControlLevel);
         HttpEntity<?> requestEntity = new HttpEntity<>(generateHeader());
-        ResponseEntity<String> responseEntity = restTemplate.exchange(ratingControlServiceConfig.getBookServiceEndpoint() + bookId,
-                HttpMethod.GET,
-                requestEntity,
-                String.class);
+        try {
+            ResponseEntity<String> responseEntity = restTemplate.exchange(
+                    ratingControlServiceConfig.getBookServiceEndpoint() + bookId,
+                    HttpMethod.GET,
+                    requestEntity,
+                    String.class);
 
-        if (HttpStatus.OK == responseEntity.getStatusCode()) {
-            Integer bookRatingControlLevel = ratingControlLevelMap.get(responseEntity.getBody());
-            String ratingControlLevel = responseEntity.getBody();
-            if (containsValidRatingLevelCodes(bookRatingControlLevel, customerProvidedRatingLevelOrder)) {
-                return bookRatingControlLevel <= customerProvidedRatingLevelOrder;
+            if (HttpStatus.OK == responseEntity.getStatusCode()) {
+                Integer bookRatingControlLevel = ratingControlLevelMap.get(responseEntity.getBody());
+                String ratingControlLevel = responseEntity.getBody();
+                if (containsValidRatingLevelCodes(bookRatingControlLevel, customerProvidedRatingLevelOrder)) {
+                    return bookRatingControlLevel <= customerProvidedRatingLevelOrder;
+                }
             }
+            return false;
+        } catch (TechnicalFailureException te) {
+            return false;  // alternatively could throw TechnicalException instead of false
+        } catch (BookNotFoundException be) {
+            throw new BookNotFoundException("Book not found ");
         }
-
-        return false;
     }
 
     private MultiValueMap<String, String> generateHeader() {
