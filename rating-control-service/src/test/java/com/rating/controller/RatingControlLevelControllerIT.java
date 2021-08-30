@@ -23,11 +23,11 @@ public class RatingControlLevelControllerIT {
 
     public static final String RCL_BOOK_V_1_READ_ELIGIBILITY = "/rcl/book/v1/read/eligibility";
 
-    @MockBean
-    private RatingControlService ratingControlService;
-
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private RatingControlService ratingControlService;
 
     @Test
     public void shouldReturnNotFound_whenCustomerControlLevelAndBookId_notProvided() throws Exception {
@@ -47,8 +47,9 @@ public class RatingControlLevelControllerIT {
     public void shouldTrue_whenBookServiceControlLevelIsEqualTo_CustomerRatingControlLevel_ForRequestedBookId()
             throws Exception {
         // need service implementation here because to get 200 status we need to make a call to the service
+        // @MockBean annotation. It allow to mock a class or an interface and to record and verify behaviors on it.
         given(ratingControlService.canReadBook(anyString(), anyString())).willReturn(true);
-        mockMvc.perform(MockMvcRequestBuilders.get("/rcl/book/v1/read/eligibility/12/B1234")
+        mockMvc.perform(MockMvcRequestBuilders.get(RCL_BOOK_V_1_READ_ELIGIBILITY + "/12/B1234")
                         .accept("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("true"));
